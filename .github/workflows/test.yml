@@ -130,7 +130,7 @@ jobs:
     needs: [ test ]
     runs-on: ubuntu-latest
     permissions:
-      # checks: write
+      checks: write
       pull-requests: write
     steps:
       - name: Download Artifacts
