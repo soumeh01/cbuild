@@ -125,10 +125,13 @@ jobs:
           if-no-files-found: error
 
   publish-test-results:
-    if: github.workflow != 'Release'
+    if: ${{ github.workflow != 'Release' }}
     name: "Publish Tests Results"
     needs: [ test ]
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -142,7 +145,7 @@ jobs:
           report_individual_runs: true
 
   coverage:
-    if: github.workflow != 'Release'
+    if: ${{ github.workflow != 'Release' && github.repository == 'soumeh01/devtools' }}
     needs: [ test ]
     name: 'Coverage check'
     runs-on: ubuntu-latest
