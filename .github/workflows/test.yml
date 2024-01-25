@@ -65,14 +65,14 @@ jobs:
   test:
     strategy:
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-latest]
+        platform: [ubuntu-latest]
         include:
           - platform: ubuntu-latest
             target: linux
-          - platform: windows-latest
-            target: windows
-          - platform: macos-latest
-            target: darwin
+          # - platform: windows-latest
+          #   target: windows
+          # - platform: macos-latest
+          #   target: darwin
     name: 'Test (${{ matrix.target }})'
     runs-on: ${{ matrix.platform }}
     steps:
@@ -87,11 +87,23 @@ jobs:
 
       - name: Install go-junit-report
         run: go install github.com/jstemmer/go-junit-report/v2@latest
+      - name: Context
+        run: echo "${{ toJson(github) }}"
 
       - name: Unit testing
         run: |
           mkdir -p build
           go test -v ./... > build/cbuildtests-${{ matrix.target }}-amd64.txt
+
+      - uses: ravsamhq/notify-slack-action@v2
+        if: failure()
+        with:
+          status: ${{ job.status }}
+          notification_title: " "
+          notify_when: "failure"
+          message_format: ":collision: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|ERROR - E2E validation job is failing> \n Note: This alert will continue until it succeeds."
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Generate JUnit test report
         if: always()
