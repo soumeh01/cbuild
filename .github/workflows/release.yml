@@ -59,3 +59,14 @@ jobs:
       - name: run cbuild
         run: |
           ls -la download
+          tar -xvf ./download/*.tar.gz -C ./
+          cp */CHANGELOG.md ./
+          ls -la
+
+      - name: Attach binary release assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./CHANGELOG.md
+          tag: ${{ github.ref }}
+          overwrite: true
