@@ -59,8 +59,7 @@ jobs:
       - name: run cbuild
         run: |
           ls -la download
-          mkdir -p relBinary
-          tar -xvf ./*.tar.gz -C relBinary
+          tar -xvf ./download/*.tar.gz -C ./
           cp */CHANGELOG.md ./
           ls -la
 
