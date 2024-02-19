@@ -27,9 +27,17 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Print current working directory
+        run: |
+          echo "Current working directory is $GITHUB_WORKSPACE"
+          ls -la $GITHUB_WORKSPACE
       - name: Check out repository code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
+      - name: Print current working directory
+        run: |
+          echo "Current working directory is $GITHUB_WORKSPACE"
+          ls -la $GITHUB_WORKSPACE
       - name: Install Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
