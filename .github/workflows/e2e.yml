@@ -1,0 +1,109 @@
+name: E2E
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/e2e.yml'
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    env:
+      CMSIS_PACK_ROOT: /home/runner/.cache/arm/packs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        if: ${{ github.workflow != 'Release' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Create a patch directory
+        run: |
+          mkdir -p patch
+
+      # - name: Download cmsis-toolbox-patch
+      #   uses: robinraju/release-downloader@v1.10
+      #   with:
+      #     repository: Arm-Debug/uvprojx-converter
+      #     tag: "cmsis-toolbox-patch"
+      #     fileName: "cmsis-toolbox-linux-amd64.tar.gz"
+      #     out-file-path: "patch"
+      #     extract: true
+
+      - name: Download cmsis-toolbox-patch
+        uses: robinraju/release-downloader@v1.10
+        continue-on-error: true
+        with:
+          repository: "Arm-Debug/uvprojx-converter"
+          tag: "cmsis-toolbox-patch"
+          fileName: "cmsis-toolbox-linux-amd64.tar.gz"
+          out-file-path: "patch"
+
+      # - name: Download cmsis-toolbox-patch asset
+      #   uses: dsaltares/fetch-gh-release-asset@master
+      #   with:
+      #     repo: 'soumeh01/cbuild'
+      #     version: 'tags/cmsis-toolbox-patch'
+      #     file: "*.*"
+      #     target: 'patch/'
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Check if file exists
+        id: check_file
+        run: |
+          if [ -f "patch/cmsis-toolbox-linux-amd64.tar.gz" ]; then
+            echo "File exists"
+            echo "release_asset_exists=$(echo '1')" >> $GITHUB_OUTPUT
+          else
+            echo "File does not exist"
+            echo "release_asset_exists=$(echo '0')" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Unzip downloaded cmsis-toolbox-patch
+        if: ${{ steps.check_file.outputs.release_asset_exists == '1' }}
+        run: |
+          tar -xvzf ./*.tar.gz -C ./
+        working-directory: patch
+
+        
+      # - name: check directory content1
+      #   if: always()
+      #   run: |
+      #     ls -l patch/cmsis-toolbox-linux-amd64/bin
+
+      # - name: check directory content2
+      #   if: always()
+      #   run: |
+      #     ls -l patch/cmsis-toolbox-linux-amd64/etc
+
+      - name: Check if directory is empty
+        if: always()
+        id: check_dir
+        run: |
+          if [ -z "$(ls -A patch)" ]; then
+            echo "Directory is empty"
+            echo "Exists=$(echo '0')" >> $GITHUB_OUTPUT
+          else
+            echo "Directory is not empty"
+            echo "Exists=$(echo '1')" >> $GITHUB_OUTPUT
+          fi
+
+
+      - name: Run Tests
+        if: ${{ steps.check_dir.outputs.Exists == '0' }}
+        run: |
+          echo "Run Tests with released cmsis-toolbox version"
+
+      - name: Run Tests with patch version
+        if: ${{ steps.check_dir.outputs.Exists == '1' }}
+        run: |
+          echo "Run Tests with patched cmsis-toolbox version"
+
