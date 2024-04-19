@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -187,6 +188,17 @@ type CbuildSet struct {
 	} `yaml:"cbuild-set"`
 }
 
+type CSolution struct {
+	Solution struct {
+		TargetTypes []struct {
+			Type string `yaml:"type"`
+		} `yaml:"target-types"`
+		BuildTypes []struct {
+			Type string `yaml:"type"`
+		} `yaml:"build-types"`
+	} `yaml:"solution"`
+}
+
 func ParseCbuildIndexFile(cbuildIndexFile string) (data CbuildIndex, err error) {
 	yfile, err := os.ReadFile(cbuildIndexFile)
 	if err != nil {
@@ -198,6 +210,15 @@ func ParseCbuildIndexFile(cbuildIndexFile string) (data CbuildIndex, err error) 
 
 func ParseCbuildSetFile(cbuildSetFile string) (data CbuildSet, err error) {
 	yfile, err := os.ReadFile(cbuildSetFile)
+	if err != nil {
+		return
+	}
+	err = yaml.Unmarshal(yfile, &data)
+	return
+}
+
+func ParseCSolutionFile(csolutionFile string) (data CSolution, err error) {
+	yfile, err := os.ReadFile(csolutionFile)
 	if err != nil {
 		return
 	}
@@ -304,4 +325,16 @@ func ResolveContexts(allContext []string, contextFilters []string) ([]string, er
 		}
 	}
 	return selectedContexts, nil
+}
+
+func RemoveVersionRange(str string) string {
+	// This function removes the version range specifier '>='
+	// from the pack version. for e.g. "ARM::CMSIS@>=6.0.0" is
+	// converted into "ARM::CMSIS@6.0.0"
+	re := regexp.MustCompile(`@([^0-9]*)(\d)`)
+	match := re.FindStringSubmatch(str)
+	if len(match) >= 3 {
+		return strings.Replace(str, match[1], "", 1)
+	}
+	return str
 }

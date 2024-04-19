@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,10 +12,16 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/inittest"
 	"github.com/stretchr/testify/assert"
 )
 
 const testRoot = "../../test"
+const testDir = "utils"
+
+func init() {
+	inittest.TestInitialization(testRoot, testDir)
+}
 
 func TestGetExecutablePath(t *testing.T) {
 	assert := assert.New(t)
@@ -139,7 +145,7 @@ func TestParseCbuildIndexFile(t *testing.T) {
 	})
 
 	t.Run("test cbuild-idx file parsing", func(t *testing.T) {
-		data, err := ParseCbuildIndexFile(testRoot + "/run/Test.cbuild-idx.yml")
+		data, err := ParseCbuildIndexFile(filepath.Join(testRoot, testDir, "Test.cbuild-idx.yml"))
 		assert.Nil(err)
 		var re = regexp.MustCompile(`^csolution\s[\d]+.[\d+]+.[\d+].*`)
 		assert.True(re.MatchString(data.BuildIdx.GeneratedBy))
@@ -166,7 +172,7 @@ func TestParseCbuildSetFile(t *testing.T) {
 	})
 
 	t.Run("test cbuild-set file parsing", func(t *testing.T) {
-		data, err := ParseCbuildSetFile(testRoot + "/run/Test.cbuild-set.yml")
+		data, err := ParseCbuildSetFile(filepath.Join(testRoot, testDir, "Test.cbuild-set.yml"))
 		assert.Nil(err)
 		var re = regexp.MustCompile(`^csolution\sversion\s[\d]+.[\d+]+.[\d+].*`)
 		assert.True(re.MatchString(data.ContextSet.GeneratedBy))
@@ -325,5 +331,44 @@ func TestResolveContexts(t *testing.T) {
 			assert.Nil(err)
 		}
 		assert.Equal(test.expectedResolvedContexts, outResolvedContexts)
+	}
+}
+
+func TestParseCsolutionFile(t *testing.T) {
+	assert := assert.New(t)
+
+	t.Run("test input file not available", func(t *testing.T) {
+		_, err := ParseCSolutionFile("Unknown.csolution.yml")
+		assert.Error(err)
+	})
+
+	t.Run("test csolution file parsing", func(t *testing.T) {
+		data, err := ParseCSolutionFile(filepath.Join(testRoot, testDir, "TestSolution/test.csolution.yml"))
+		assert.Nil(err)
+		assert.Equal(len(data.Solution.BuildTypes), 1)
+		assert.Equal(len(data.Solution.TargetTypes), 2)
+		assert.Equal(data.Solution.BuildTypes[0].Type, "Debug")
+		assert.Equal(data.Solution.TargetTypes[0].Type, "CM3")
+		assert.Equal(data.Solution.TargetTypes[1].Type, "CM0")
+	})
+}
+
+func TestRemoveVersionRange(t *testing.T) {
+	assert := assert.New(t)
+
+	testCases := []struct {
+		inputString    string
+		expectedOutput string
+	}{
+		{"ARM::CMSIS@>=6.0.0", "ARM::CMSIS@6.0.0"},
+		{"ARM::CMSIS@>=6.0.0-alpha0", "ARM::CMSIS@6.0.0-alpha0"},
+		{"ARM::CMSIS@6.0.0", "ARM::CMSIS@6.0.0"},
+		{"ARM::CMSIS", "ARM::CMSIS"},
+		{"", ""},
+	}
+
+	for _, test := range testCases {
+		outString := RemoveVersionRange(test.inputString)
+		assert.Equal(test.expectedOutput, outString)
 	}
 }

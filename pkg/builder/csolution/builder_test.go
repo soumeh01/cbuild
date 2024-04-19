@@ -7,22 +7,26 @@
 package csolution
 
 import (
-	builder "cbuild/pkg/builder"
-	"cbuild/pkg/inittest"
-	"cbuild/pkg/utils"
 	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	builder "github.com/Open-CMSIS-Pack/cbuild/v2/pkg/builder"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/inittest"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 const testRoot = "../../../test"
+const testDir = "csolution"
+
+var configs inittest.TestConfigs
 
 func init() {
-	inittest.TestInitialization(testRoot)
+	inittest.TestInitialization(testRoot, testDir)
+	configs = inittest.GetTestConfigs(testRoot, testDir)
 }
 
 type RunnerMock struct{}
@@ -55,12 +59,10 @@ func (r RunnerMock) ExecuteCommand(program string, quiet bool, args ...string) (
 
 func TestListContexts(t *testing.T) {
 	assert := assert.New(t)
-	configs := inittest.GetTestConfigs(testRoot)
-
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner:    RunnerMock{},
-			InputFile: testRoot + "/run/TestSolution/test.csolution.yml",
+			InputFile: filepath.Join(testRoot, testDir, "TestSolution/test.csolution.yml"),
 			InstallConfigs: utils.Configurations{
 				BinPath: configs.BinPath,
 				BinExtn: configs.BinExtn,
@@ -119,11 +121,10 @@ func TestListContexts(t *testing.T) {
 
 func TestListToolchians(t *testing.T) {
 	assert := assert.New(t)
-	configs := inittest.GetTestConfigs(testRoot)
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner:    RunnerMock{},
-			InputFile: testRoot + "/run/test.csolution.yml",
+			InputFile: filepath.Join(testRoot, testDir, "test.csolution.yml"),
 			InstallConfigs: utils.Configurations{
 				BinPath: configs.BinPath,
 				BinExtn: configs.BinExtn,
@@ -188,7 +189,6 @@ func TestListToolchians(t *testing.T) {
 
 func TestListEnvironment(t *testing.T) {
 	assert := assert.New(t)
-	configs := inittest.GetTestConfigs(testRoot)
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner: RunnerMock{},
@@ -233,15 +233,13 @@ func TestListEnvironment(t *testing.T) {
 
 func TestBuild(t *testing.T) {
 	assert := assert.New(t)
-	os.Setenv("CMSIS_PACK_ROOT", testRoot+"/run/packs")
-	configs := inittest.GetTestConfigs(testRoot)
+	os.Setenv("CMSIS_PACK_ROOT", filepath.Join(testRoot, testDir, "packs"))
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner:    RunnerMock{},
-			InputFile: testRoot + "/run/Test.csolution.yml",
+			InputFile: filepath.Join(testRoot, testDir, "Test.csolution.yml"),
 			Options: builder.Options{
-				//IntDir: testRoot + "/run/IntDir",
-				OutDir: testRoot + "/run/OutDir",
+				OutDir: filepath.Join(testRoot, testDir, "OutDir"),
 				Packs:  true,
 			},
 			InstallConfigs: utils.Configurations{
@@ -262,18 +260,24 @@ func TestBuild(t *testing.T) {
 		err := b.Build()
 		assert.Error(err)
 	})
+
+	t.Run("test build csolution using cbuild2cmake", func(t *testing.T) {
+		b.Options.Contexts = []string{"test.Debug+CM0"}
+		b.Options.UseCbuild2CMake = true
+		err := b.Build()
+		assert.Error(err)
+	})
 }
 
 func TestRebuild(t *testing.T) {
 	assert := assert.New(t)
-	os.Setenv("CMSIS_PACK_ROOT", testRoot+"/run/packs")
-	configs := inittest.GetTestConfigs(testRoot)
+	os.Setenv("CMSIS_PACK_ROOT", filepath.Join(testRoot, testDir, "packs"))
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner:    RunnerMock{},
-			InputFile: testRoot + "/run/Test.csolution.yml",
+			InputFile: filepath.Join(testRoot, testDir, "Test.csolution.yml"),
 			Options: builder.Options{
-				OutDir:  testRoot + "/run/OutDir",
+				OutDir:  filepath.Join(testRoot, testDir, "OutDir"),
 				Packs:   true,
 				Rebuild: true,
 			},
@@ -293,8 +297,6 @@ func TestRebuild(t *testing.T) {
 
 func TestInstallMissingPacks(t *testing.T) {
 	assert := assert.New(t)
-	configs := inittest.GetTestConfigs(testRoot)
-
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner: RunnerMock{},
@@ -302,6 +304,9 @@ func TestInstallMissingPacks(t *testing.T) {
 				BinPath: configs.BinPath,
 				BinExtn: configs.BinExtn,
 				EtcPath: configs.EtcPath,
+			},
+			Options: builder.Options{
+				Packs: true,
 			},
 		},
 	}
@@ -318,12 +323,17 @@ func TestInstallMissingPacks(t *testing.T) {
 		b.InstallConfigs.BinExtn = binExtn
 		assert.Error(err)
 	})
+
+	t.Run("test install missing packs with no --pack arg", func(t *testing.T) {
+		b.Options.Packs = false
+		err := b.installMissingPacks()
+		assert.Nil(err)
+	})
 }
 
 func TestGetCprjFilePath(t *testing.T) {
 	assert := assert.New(t)
-
-	testIdxFile := testRoot + "/run/Test.cbuild-idx.yml"
+	testIdxFile := filepath.Join(testRoot, testDir, "Test.cbuild-idx.yml")
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner: RunnerMock{},
@@ -351,14 +361,13 @@ func TestGetCprjFilePath(t *testing.T) {
 			testIdxFile,
 			"HelloWorld_cm0plus.Debug+FRDM-K32L3A6")
 		assert.Nil(err)
-		assert.Equal(path, filepath.Join(testRoot, "run", "cm0plus", "HelloWorld_cm0plus.Debug+FRDM-K32L3A6.cprj"))
+		assert.Equal(path, filepath.Join(testRoot, testDir, "cm0plus", "HelloWorld_cm0plus.Debug+FRDM-K32L3A6.cprj"))
 	})
 }
 
 func TestGetSelectedContexts(t *testing.T) {
 	assert := assert.New(t)
-
-	testSetFile := testRoot + "/run/Test.cbuild-set.yml"
+	testSetFile := filepath.Join(testRoot, testDir, "Test.cbuild-set.yml")
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner: RunnerMock{},
@@ -393,7 +402,7 @@ func TestGetSelectedContexts(t *testing.T) {
 			"HelloWorld_cm4.Release+FRDM-K32L3A6",
 		}
 		b.Options.UseContextSet = false
-		contexts, err := b.getSelectedContexts(testRoot + "/run/Test.cbuild-idx.yml")
+		contexts, err := b.getSelectedContexts(filepath.Join(testRoot, testDir, "Test.cbuild-idx.yml"))
 		assert.Nil(err)
 		assert.Equal(contexts, expectedContexts)
 	})
@@ -401,7 +410,6 @@ func TestGetSelectedContexts(t *testing.T) {
 
 func TestGetIdxFilePath(t *testing.T) {
 	assert := assert.New(t)
-
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner: RunnerMock{},
@@ -409,7 +417,7 @@ func TestGetIdxFilePath(t *testing.T) {
 	}
 
 	t.Run("test invalid input file", func(t *testing.T) {
-		b.InputFile = "run/TestSolution/invalid_file.yml"
+		b.InputFile = filepath.Join(testRoot, testDir, "TestSolution/invalid_file.yml")
 
 		path, err := b.getIdxFilePath()
 		assert.Error(err)
@@ -417,20 +425,20 @@ func TestGetIdxFilePath(t *testing.T) {
 	})
 
 	t.Run("test get idx file path", func(t *testing.T) {
-		b.InputFile = "run/TestSolution/test.csolution.yml"
+		b.InputFile = filepath.Join(testRoot, testDir, "TestSolution/test.csolution.yml")
 
 		path, err := b.getIdxFilePath()
 		assert.Nil(err)
-		assert.Equal(path, "run/TestSolution/test.cbuild-idx.yml")
+		assert.Equal(path, utils.NormalizePath(filepath.Join(testRoot, testDir, "TestSolution/test.cbuild-idx.yml")))
 	})
 
 	t.Run("test get idx file path with output path", func(t *testing.T) {
-		b.InputFile = "run/TestSolution/test.csolution.yml"
-		b.Options.Output = "run/outdir"
+		b.InputFile = filepath.Join(testRoot, testDir, "TestSolution/test.csolution.yml")
+		b.Options.Output = filepath.Join(testRoot, testDir, "outdir")
 
 		path, err := b.getIdxFilePath()
 		assert.Nil(err)
-		assert.Equal(path, b.Options.Output+"/test.cbuild-idx.yml")
+		assert.Equal(path, utils.NormalizePath(b.Options.Output+"/test.cbuild-idx.yml"))
 	})
 }
 
@@ -439,27 +447,25 @@ func TestFormulateArg(t *testing.T) {
 	b := CSolutionBuilder{
 		BuilderParams: builder.BuilderParams{
 			Runner:    RunnerMock{},
-			InputFile: testRoot + "/run/Test.csolution.yml",
+			InputFile: filepath.Join(testRoot, testDir, "Test.csolution.yml"),
 		},
 	}
 
 	t.Run("test default arg", func(t *testing.T) {
-		args, err := b.formulateArgs([]string{"convert"})
-		strArg := strings.Join(args, " ")
-		assert.Nil(err)
-		assert.Equal("convert --solution=../../../test/run/Test.csolution.yml --no-check-schema --no-update-rte", strArg)
+		args := b.formulateArgs([]string{"convert"})
+		strArg := utils.NormalizePath(strings.Join(args, " "))
+		assert.Equal("convert --solution=../../../test/"+testDir+"/Test.csolution.yml --no-check-schema --no-update-rte", strArg)
 	})
 
 	t.Run("test context-set arg", func(t *testing.T) {
 		b.Options = builder.Options{
-			OutDir:        testRoot + "/run/OutDir",
+			OutDir:        filepath.Join(testRoot, testDir, "OutDir"),
 			Contexts:      []string{"test.Debug+Target", "test.Release+Target"},
 			UseContextSet: true,
 		}
-		args, err := b.formulateArgs([]string{"convert"})
-		strArg := strings.Join(args, " ")
-		assert.Nil(err)
-		assert.Equal("convert --solution=../../../test/run/Test.csolution.yml --no-check-schema --no-update-rte --context=test.Debug+Target --context=test.Release+Target --context-set", strArg)
+		args := b.formulateArgs([]string{"convert"})
+		strArg := utils.NormalizePath(strings.Join(args, " "))
+		assert.Equal("convert --solution=../../../test/"+testDir+"/Test.csolution.yml --no-check-schema --no-update-rte --context=test.Debug+Target --context=test.Release+Target --context-set", strArg)
 	})
 }
 
@@ -473,18 +479,18 @@ func TestGetCbuildSetFilePath(t *testing.T) {
 	}
 
 	t.Run("test invalid input file", func(t *testing.T) {
-		b.InputFile = "run/TestSolution/invalid_file.yml"
+		b.InputFile = filepath.Join(testRoot, testDir, "TestSolution/invalid_file.yml")
 
-		path, err := b.getSetFilePath()
+		path, err := b.getCbuildSetFilePath()
 		assert.Error(err)
 		assert.Equal(path, "")
 	})
 
 	t.Run("test get cbuild-set file path", func(t *testing.T) {
-		b.InputFile = "run/TestSolution/test.csolution.yml"
+		b.InputFile = filepath.Join(testRoot, testDir, "TestSolution/test.csolution.yml")
 
-		path, err := b.getSetFilePath()
+		path, err := b.getCbuildSetFilePath()
 		assert.Nil(err)
-		assert.Equal(path, "run/TestSolution/test.cbuild-set.yml")
+		assert.Equal(path, utils.NormalizePath(filepath.Join(testRoot, testDir, "TestSolution/test.cbuild-set.yml")))
 	})
 }

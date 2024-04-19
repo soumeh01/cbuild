@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,19 +7,21 @@
 package build_test
 
 import (
-	"cbuild/cmd/cbuild/commands"
 	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/Open-CMSIS-Pack/cbuild/v2/cmd/cbuild/commands"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 const testRoot = "../../../../test"
+const testDir = "command"
 
 func TestBuildCPRJCommand(t *testing.T) {
 	assert := assert.New(t)
-	cprjFile := testRoot + "/run/minimal.cprj"
+	cprjFile := filepath.Join(testRoot, testDir, "minimal.cprj")
 
 	t.Run("multiple arguments", func(t *testing.T) {
 		cmd := commands.NewRootCmd()
@@ -38,9 +40,9 @@ func TestBuildCPRJCommand(t *testing.T) {
 
 func TestPreLogConfiguration(t *testing.T) {
 	assert := assert.New(t)
-	logDir := testRoot + "/run/log"
-	logFile := logDir + "/test.log"
-	cprjFile := testRoot + "/run/minimal.cprj"
+	logDir := filepath.Join(testRoot, testDir, "log")
+	logFile := filepath.Join(logDir, "test.log")
+	cprjFile := filepath.Join(testRoot, testDir, "minimal.cprj")
 
 	t.Run("test normal verbosity level", func(t *testing.T) {
 		// No quiet, No debug

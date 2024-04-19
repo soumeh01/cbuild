@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,13 +7,14 @@
 package list_test
 
 import (
-	"cbuild/cmd/cbuild/commands"
 	"testing"
 
+	"github.com/Open-CMSIS-Pack/cbuild/v2/cmd/cbuild/commands"
 	"github.com/stretchr/testify/assert"
 )
 
 const testRoot = "../../../../test"
+const testDir = "command"
 
 func TestListCommand(t *testing.T) {
 	assert := assert.New(t)

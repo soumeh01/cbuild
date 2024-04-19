@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,12 +7,6 @@
 package commands
 
 import (
-	"cbuild/cmd/cbuild/commands/build"
-	"cbuild/cmd/cbuild/commands/list"
-	"cbuild/pkg/builder"
-	"cbuild/pkg/builder/cproject"
-	"cbuild/pkg/builder/csolution"
-	"cbuild/pkg/utils"
 	"errors"
 	"fmt"
 	"io"
@@ -20,6 +14,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Open-CMSIS-Pack/cbuild/v2/cmd/cbuild/commands/build"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/cmd/cbuild/commands/list"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/cmd/cbuild/commands/setup"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/builder"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/builder/cproject"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/builder/csolution"
+	"github.com/Open-CMSIS-Pack/cbuild/v2/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -128,28 +129,32 @@ func NewRootCmd() *cobra.Command {
 			updateRte, _ := cmd.Flags().GetBool("update-rte")
 			toolchain, _ := cmd.Flags().GetString("toolchain")
 			useContextSet, _ := cmd.Flags().GetBool("context-set")
+			frozenPacks, _ := cmd.Flags().GetBool("frozen-packs")
+			useCbuild2CMake, _ := cmd.Flags().GetBool("cbuild2cmake")
 
 			options := builder.Options{
-				IntDir:        intDir,
-				OutDir:        outDir,
-				LockFile:      lockFile,
-				LogFile:       logFile,
-				Generator:     generator,
-				Target:        target,
-				Jobs:          jobs,
-				Quiet:         quiet,
-				Debug:         debug,
-				Verbose:       verbose,
-				Clean:         clean,
-				Schema:        schema,
-				Packs:         packs,
-				Rebuild:       rebuild,
-				UpdateRte:     updateRte,
-				Contexts:      contexts,
-				UseContextSet: useContextSet,
-				Load:          load,
-				Output:        output,
-				Toolchain:     toolchain,
+				IntDir:          intDir,
+				OutDir:          outDir,
+				LockFile:        lockFile,
+				LogFile:         logFile,
+				Generator:       generator,
+				Target:          target,
+				Jobs:            jobs,
+				Quiet:           quiet,
+				Debug:           debug,
+				Verbose:         verbose,
+				Clean:           clean,
+				Schema:          schema,
+				Packs:           packs,
+				Rebuild:         rebuild,
+				UpdateRte:       updateRte,
+				Contexts:        contexts,
+				UseContextSet:   useContextSet,
+				Load:            load,
+				Output:          output,
+				Toolchain:       toolchain,
+				FrozenPacks:     frozenPacks,
+				UseCbuild2CMake: useCbuild2CMake,
 			}
 
 			configs, err := utils.GetInstallConfigs()
@@ -195,7 +200,8 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.Flags().BoolP("packs", "p", false, "Download missing software packs with cpackget")
 	rootCmd.Flags().BoolP("rebuild", "r", false, "Remove intermediate and output directories and rebuild")
 	rootCmd.Flags().BoolP("update-rte", "", false, "Update the RTE directory and files")
-	rootCmd.Flags().BoolP("context-set", "S", false, "Use context set")
+	rootCmd.Flags().BoolP("context-set", "S", false, "Select the context names from cbuild-set.yml for generating the target application")
+	rootCmd.Flags().BoolP("frozen-packs", "", false, "Pack list and versions from cbuild-pack.yml are fixed and raises errors if it changes")
 	rootCmd.Flags().StringP("generator", "g", "Ninja", "Select build system generator")
 	rootCmd.Flags().StringSliceP("context", "c", []string{}, "Input context names [<project-name>][.<build-type>][+<target-type>]")
 	rootCmd.Flags().StringP("load", "l", "", "Set policy for packs loading [latest | all | required]")
@@ -205,6 +211,7 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().BoolP("schema", "s", false, "Validate project input file(s) against schema")
 	rootCmd.PersistentFlags().StringP("log", "", "", "Save output messages in a log file")
 	rootCmd.PersistentFlags().StringP("toolchain", "", "", "Input toolchain to be used")
+	rootCmd.Flags().BoolP("cbuild2cmake", "", false, "Use build information files with cbuild2cmake interface (experimental)")
 
 	// CPRJ specific hidden flags
 	rootCmd.Flags().StringP("intdir", "i", "", "Set directory for intermediate files")
@@ -215,7 +222,7 @@ func NewRootCmd() *cobra.Command {
 	_ = rootCmd.Flags().MarkHidden("update")
 
 	rootCmd.SetFlagErrorFunc(FlagErrorFunc)
-	rootCmd.AddCommand(build.BuildCPRJCmd, list.ListCmd)
+	rootCmd.AddCommand(build.BuildCPRJCmd, list.ListCmd, setup.SetUpCmd)
 	return rootCmd
 }
 
