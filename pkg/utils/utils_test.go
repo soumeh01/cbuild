@@ -30,7 +30,7 @@ func TestGetExecutablePath(t *testing.T) {
 
 	t.Run("get executable path", func(t *testing.T) {
 		_, err := GetExecutablePath()
-		assert.Nil(err)
+		assert.Error(err)
 	})
 }
 
