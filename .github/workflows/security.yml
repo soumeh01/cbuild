@@ -12,6 +12,8 @@ jobs:
     permissions:
       # required for all workflows
       security-events: write
+      actions: read
+      contents: read
     env:
       GO111MODULE: on
     steps:
@@ -22,8 +24,15 @@ jobs:
         uses: securego/gosec@master
         with:
           args: '-no-fail -fmt sarif -out results.sarif ./...'
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
-          # Path to SARIF file relative to the root of the repository
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+
+      # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@f6091c0113d1dcf9b98e269ee48e8a7e51b7bdd4 # v3.28.5
+        with:
           sarif_file: results.sarif
