@@ -48,7 +48,7 @@ jobs:
         with:
           version: latest
           skip-cache: true
-          args: "--verbose --print-issued-lines --print-linter-name --out-${NO_FUTURE}format colored-line-number --timeout 300s --max-issues-per-linter 0 --max-same-issues 0"
+          args: "--verbose --config=./.golangci.yml --print-issued-lines --print-linter-name --out-${NO_FUTURE}format colored-line-number --timeout 300s --max-issues-per-linter 0 --max-same-issues 0"
 
   format:
     name: Format
