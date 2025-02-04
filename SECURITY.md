@@ -1,7 +1,10 @@
-# Security Policy
+# Security  
 
-## Reporting a Vulnerability
+If you discover a significant vulnerability, please report it privately to ensure a responsible disclosure process.  
 
-If you find a vulnerability in a project maintained by the cbuild, please report that directly to the project maintaining that code, preferably using GitHub's Private Vulnerability Reporting.
+We recommend using GitHub's [private vulnerability reporting mechanism](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability). To submit a report:  
 
-Thank you.
+1. Visit the parent [repository’s Security tab](https://github.com/soumeh01/cmsis-toolbox/security).  
+2. Click **"Report a vulnerability"** to open the advisory form.  
+
+Your responsible disclosure helps maintain the security and integrity of the project. Thank you for your contribution!
