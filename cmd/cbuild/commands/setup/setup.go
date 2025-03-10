@@ -146,6 +146,11 @@ var SetUpCmd = &cobra.Command{
 		perf_result_file, _ := cmd.Flags().GetString("perf-report")
 		tracker := utils.GetTrackerInstance(perf_result_file)
 		if tracker != nil {
+			exampleDir, err := utils.GetParentFolder(args[0])
+			if err != nil {
+				return err
+			}
+			utils.SetExample(exampleDir)
 			tracker.StartTracking("cbuild", "setup "+strings.Join(args, " "))
 		}
 
