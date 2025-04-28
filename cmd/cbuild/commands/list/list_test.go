@@ -24,6 +24,7 @@ func TestListCommand(t *testing.T) {
 		cmd.SetArgs([]string{"list"})
 		err := cmd.Execute()
 		assert.Nil(err)
+		assert.Error(err)
 	})
 
 	t.Run("invalid flag", func(t *testing.T) {
