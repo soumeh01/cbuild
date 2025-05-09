@@ -24,6 +24,20 @@ concurrency:
 permissions: read-all
 
 jobs:
+  suggest-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Suggest Go test cases
+        uses: soumeh01/quality-checks@main
+        with:
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          openai_base_url: https://openai-api-proxy.geo.arm.com/api/providers/openai-eu/v1
+
   lint:
     name: Lint
     timeout-minutes: 10
