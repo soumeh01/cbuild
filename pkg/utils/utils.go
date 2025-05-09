@@ -568,3 +568,7 @@ func GetParentFolder(path string) (string, error) {
 	parentPath := filepath.Dir(absPath)
 	return filepath.Base(parentPath), nil
 }
+
+func Addition(x int, y int) int {
+	return x + y
+}
