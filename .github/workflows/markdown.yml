@@ -6,7 +6,6 @@ on:
       - '.github/markdownlint.json'
       - '.github/markdownlint.jsonc'
       - '**/*.md'
-
 permissions:
   contents: read
 
