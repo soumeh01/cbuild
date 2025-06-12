@@ -14,6 +14,3 @@ jobs:
   markdown-check:
     name: Markdown Check 
     uses: soumeh01/infra-library/.github/workflows/markdown.yml@main
-    with:
-      lint: true
-      link-check: true
