@@ -12,24 +12,27 @@ solution:
       device: ARMCM0
       target-set:
         - set: Custom3
+          images:
+            - project-context: test2.Debug
+            - project-context: test1.Debug
       misc:
         - compiler: GCC
 
   build-types:
     - type: Debug
       misc:
-      - compiler: GCC
-        C*:
-        - -O
-        - -Wall
-        - -gdwarf-2
-        - -mapcs-frame
-        - -mthumb
-        Link:
-        - --entry=Reset_Handler
-        - --specs=nosys.specs
-        - -mcpu=cortex-m3
-        - -mthumb
+        - compiler: GCC
+          C*:
+            - -O
+            - -Wall
+            - -gdwarf-2
+            - -mapcs-frame
+            - -mthumb
+          Link:
+            - --entry=Reset_Handler
+            - --specs=nosys.specs
+            - -mcpu=cortex-m3
+            - -mthumb
 
       compiler: GCC
       processor:

@@ -13,3 +13,6 @@ permissions:
 jobs:
   check:
     uses: soumeh01/infra-library/.github/workflows/markdown.yml@main
+    with:
+      lint-config: '.github/markdownlint.jsonc'
+      link-check-config: '.github/markdown-link-check.jsonc'
