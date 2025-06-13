@@ -6,10 +6,10 @@ on:
       - '.github/markdownlint.json'
       - '.github/markdownlint.jsonc'
       - '**/*.md'
+
 permissions:
   contents: read
 
 jobs:
-  markdown-check:
-    name: Markdown Check 
+  check:
     uses: soumeh01/infra-library/.github/workflows/markdown.yml@main
