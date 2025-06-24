@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Check links
-        uses: lycheeverse/lychee-action@v2   # pin to a tag or SHA in prod
+        uses: lycheeverse/lychee-action@v2
         with:
           args: --base . --verbose --no-progress "./**/*.md"
           jobSummary: true
