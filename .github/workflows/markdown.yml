@@ -51,7 +51,6 @@ jobs:
         # Checks all Markdown files, including those in subfolders,
         # as the PR may involve removing referenced Markdown files.
         with:
-          use-quiet-mode: 'yes'
           use-verbose-mode: 'yes'
           base-branch: ${{ github.base_ref }}
           config-file: '.github/markdown-link-check.jsonc'
