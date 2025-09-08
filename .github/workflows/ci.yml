@@ -29,3 +29,4 @@ jobs:
       test-matrix: '[{"platform":"ubuntu-24.04","arch":"amd64"},{"platform":"macos-14","arch":"arm64"}]'
       go-version-file: ./go.mod
       artifact-retention-days: 1
+
