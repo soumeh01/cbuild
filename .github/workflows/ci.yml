@@ -28,4 +28,5 @@ jobs:
       program: cbuild
       test-matrix: '[{"platform":"ubuntu-24.04","arch":"amd64"},{"platform":"macos-14","arch":"arm64"}]'
       go-version-file: ./go.mod
+      enable-code-climate: false
       artifact-retention-days: 1
