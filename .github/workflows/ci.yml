@@ -31,13 +31,13 @@ jobs:
       artifact-retention-days: 1
 
   publish-test-results:
-    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && github.workflow != 'Release' }}
     name: "Publish Tests Results"
     needs: [ build-and-verify ]
     runs-on: ubuntu-latest
     permissions:
       checks: write
       pull-requests: write
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && github.workflow != 'Release' }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
@@ -55,4 +55,3 @@ jobs:
           commit: ${{ github.event.workflow_run.head_sha }}
           junit_files: "artifacts/**/cbuild-testreport-*.xml"
           report_individual_runs: true
-
