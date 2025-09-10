@@ -22,7 +22,6 @@ concurrency:
 permissions: read-all
 
 jobs:
-
   copyright-check:
     uses: Open-CMSIS-Pack/workflows-and-actions-collection/.github/workflows/copyright.yml@copyright-check
 
