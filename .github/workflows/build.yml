@@ -18,9 +18,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+
 # Declare default permissions as read-only
 permissions: read-all
 
 jobs:
   copyright-check:
     uses: Open-CMSIS-Pack/workflows-and-actions-collection/.github/workflows/copyright.yml@copyright-check
+    with:
+      copyright-text: 'Copyright \(c\) (?:\d{4}(?:-\d{4})?) Arm Limited\. All rights reserved\.'
