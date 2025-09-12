@@ -5,9 +5,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  workflows: write
 
 jobs:
   update-workflows:
     uses: soumeh01/workflows-and-actions-collection/.github/workflows/update-workflows.yml@updateworkflow
-    permissions: inherit
+    secrets: inherit
