@@ -23,7 +23,7 @@ permissions: read-all
 
 jobs:
   build-and-verify:
-    uses: Open-CMSIS-Pack/workflows-and-actions-collection/.github/workflows/build-and-verify.yml@build-verify-workflow
+    uses: Open-CMSIS-Pack/workflows-and-actions-collection/.github/workflows/build-and-verify.yml@self-check
     with:
       program: cbuild
       go-version-file: ./go.mod
