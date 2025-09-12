@@ -8,6 +8,6 @@ permissions:
 
 jobs:
   update-workflows:
-    uses: soumeh01/workflows-and-actions-collection/.github/workflows/update-workflows.yml@updateworkflow
+    uses: soumeh01/workflows-and-actions-collection/.github/workflows/update-workflows.yml@v1.0.0
     secrets:
       TOKEN_ACCESS: ${{ secrets.PAT_TOKEN }}
