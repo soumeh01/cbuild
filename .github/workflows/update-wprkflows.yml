@@ -9,4 +9,4 @@ permissions:
 jobs:
   update-workflows:
     uses: soumeh01/workflows-and-actions-collection/.github/workflows/update-workflows.yml@updateworkflow
-    secrets: inherit
+    secrets: ${{ secrets.GITHUB_TOKEN }}
