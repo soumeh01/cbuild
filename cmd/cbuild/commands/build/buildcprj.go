@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 package build
 
 import (
