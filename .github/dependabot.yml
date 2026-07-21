@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+
+    schedule:
+      interval: "monthly"
+      time: "02:00"
+      timezone: "Europe/Berlin"
+
+    open-pull-requests-limit: 5
+
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+    cooldown:
+      default-days: 14
+
+    commit-message:
+      prefix: "ci"
+
+    labels:
+      - "dependencies"
+      - "github-actions"
