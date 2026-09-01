@@ -1,0 +1,13 @@
+name: Update vscode-workflows
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-workflows:
+    uses: soumeh01/workflows-and-actions-collection/.github/workflows/update-workflows.yml@v1.0.0
+    secrets:
+      TOKEN_ACCESS: ${{ secrets.PAT_TEST2 }}
